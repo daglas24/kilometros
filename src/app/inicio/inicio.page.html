@@ -1,6 +1,9 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Inicio</ion-title>
+    <ion-buttons slot="start">
+      <ion-button color="primary" (click)="goToTienda()">(Tienda presione aqui)</ion-button>
+    </ion-buttons>
+    <ion-title></ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -23,7 +26,6 @@
   <ion-button expand="full" (click)="pause()">Pause</ion-button>
   <ion-button expand="full" (click)="stop()">Stop</ion-button>
 
-  <!-- Table -->
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 demo-table">
     <!-- Position Column -->
     <ng-container matColumnDef="position">
@@ -31,7 +33,6 @@
       <td mat-cell *matCellDef="let element"> {{element.position}} </td>
     </ng-container>
 
-    <!-- Name Column -->
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef> combustible </th>
       <td mat-cell *matCellDef="let element"> {{element.name}} </td>
@@ -52,3 +53,4 @@
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
+</ion-content>

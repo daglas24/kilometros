@@ -25,7 +25,7 @@ ion-content {
   border-radius: 12px;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.475);
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.475);
 }
 
 .side-image {
@@ -36,20 +36,20 @@ ion-content {
 
 ion-item {
   --background: transparent;
-  color: #000000;
+  color: #ffffff;
   margin-bottom: 20px;
-  border: 1px solid #000000;
+  border: 1px solid #ffffff;
   border-radius: 8px;
   padding: 10px;
 }
 
 ion-label {
-  color: #000000;
+  color: #ffffff;
   font-size: 14px;
 }
 
 ion-input {
-  --color: #000000;
+  --color: #ffffff;
   --placeholder-color: #000000;
   padding-left: 5px;
 }

@@ -1,5 +1,6 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { Router } from '@angular/router';
 
 export interface PeriodicElement {
   name: string;
@@ -32,7 +33,7 @@ export class InicioPage {
   displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
   dataSource = new MatTableDataSource(ELEMENT_DATA);
 
-  constructor() { }
+  constructor(private router: Router) { }
 
   play() {
     if (this.videoPlayer && this.videoPlayer.nativeElement) {
@@ -51,5 +52,10 @@ export class InicioPage {
       this.videoPlayer.nativeElement.pause();
       this.videoPlayer.nativeElement.currentTime = 0;
     }
+  }
+
+  // Método para redirigir a la página de tienda
+  goToTienda() {
+    this.router.navigate(['/tienda']);
   }
 }

@@ -1,0 +1,35 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Recuperar Contraseña</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+  <div class="recuperar-container">
+    <form #recuperarForm="ngForm" (ngSubmit)="onSubmit(recuperarForm)" class="recuperar-form">
+      <ion-item>
+        <ion-label position="floating">Correo Electrónico</ion-label>
+        <ion-input 
+          type="email" 
+          name="email" 
+          ngModel 
+          required 
+          pattern=".*@.*" 
+          #emailInput="ngModel">
+        </ion-input>
+      </ion-item>
+
+      <ion-item *ngIf="emailInput.invalid && emailInput.touched" color="danger">
+        <ion-label>El correo electrónico debe contener un &#64;.</ion-label>
+      </ion-item>
+
+      <ion-button expand="full" type="submit" [disabled]="!recuperarForm.form.valid">Enviar</ion-button>
+      
+      <ion-item *ngIf="errorMessage" color="danger">
+        <ion-label>{{ errorMessage }}</ion-label>
+      </ion-item>
+      
+      <a class="volver" routerLink="/login"><strong>Volver al Login</strong></a>
+    </form>
+  </div>
+</ion-content>
