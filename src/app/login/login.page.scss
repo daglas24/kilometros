@@ -1,13 +1,14 @@
 ion-content {
-  position: relative;
-  color: #000000;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
   align-content: center;
   height: 100vh;
   padding: 0;
+  text-align: center;
+  position: relative;
+  color: #e4d2d2;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .login-container {
@@ -56,12 +57,14 @@ ion-input {
 
 ion-button {
   --background: #3d4047;
+  color: #ffffff;
   margin-top: 20px;
   font-size: 16px;
   font-weight: 600;
   text-transform: uppercase;
   color: #000000;
 }
+
 
 ion-toolbar {
   text-transform: uppercase;
@@ -71,14 +74,30 @@ ion-toolbar {
   font-size: 20px;
   font-weight: bold;
 }
+ion-title{
+  color: #ffffff;
+}
 
 .crear {
   display: flex;
-  color: #000000;
+  text-decoration: none;
+  color: #fcf4f4;
   justify-content: center;
   align-items: center;
 }
 
 .validpass {
   color: #000000;
+}
+
+img{
+  border-radius: 200px;
+  position: relative;
+  display: flex;
+}
+
+#map {
+  width: 100%;
+  height: 300px;
+  margin-top: 20px;
 }

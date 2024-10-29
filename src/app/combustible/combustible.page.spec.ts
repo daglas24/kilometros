@@ -1,17 +1,23 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CombustiblePage } from './combustible.page';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 
-describe('CombustiblePage', () => {
-  let component: CombustiblePage;
-  let fixture: ComponentFixture<CombustiblePage>;
+@Component({
+  selector: 'app-combustible',
+  templateUrl: './combustible.page.html',
+  styleUrls: ['./combustible.page.scss'],
+})
+export class CombustiblePage implements OnInit {
+  username: string = '';
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(CombustiblePage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  constructor(private route: ActivatedRoute, private router: Router) {}
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      this.username = params['username'] || 'Invitado';
+    });
+  }
+
+  goToInicio() {
+    this.router.navigate(['/inicio']);
+  }
+}

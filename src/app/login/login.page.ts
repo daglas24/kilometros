@@ -1,79 +1,140 @@
-import { Component, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
-import { Router } from '@angular/router';
-import { IonModal, AnimationController } from '@ionic/angular';
-import { UserService } from '../services/user.service'; // Asegúrate de que tienes UserService
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Router, NavigationExtras } from '@angular/router';
+import { SqliteService } from '../services/sqlite.service';
+import { ModalController } from '@ionic/angular';
+import { HttpClient } from '@angular/common/http';
+
+declare var google: any;
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
 })
-export class LoginPage {
-  @ViewChild('modal', { static: false }) modal!: IonModal;
-  passwordError: string | null = null;
-  loginData = {
+export class LoginPage implements OnInit {
+  @ViewChild('map', { static: false }) mapElement!: ElementRef;
+  map: any;
+
+  user = {
     email: '',
     password: ''
   };
 
-  constructor(private router: Router, private animationCtrl: AnimationController, private userService: UserService) {}
+  passwordValid: boolean = true;
+  errorMessage: string = '';
+  isAuthenticated: boolean = false;
+
+  constructor(
+    private router: Router,
+    private sqliteService: SqliteService,
+    private modalController: ModalController,
+    private http: HttpClient
+  ) {
+    this.loadUserFromLocalStorage();
+  }
 
   ngOnInit() {
-    const loginFormElement = document.querySelector('.login-form');
-    if (loginFormElement) {
-      const loginFormAnimation = this.animationCtrl
-        .create()
-        .addElement(loginFormElement)
-        .duration(500)
-        .keyframes([
-          { offset: 0, opacity: '0', transform: 'translateY(-100px)' },
-          { offset: 1, opacity: '1', transform: 'translateY(0)' },
-        ]);
+    this.checkIfAuthenticated();
+    this.loadMap();
+  }
 
-      loginFormAnimation.play();
+  loadMap() {
+    const latLng = new google.maps.LatLng(40.73061, -73.935242); // Coordenadas de ejemplo
+    const mapOptions = {
+      center: latLng,
+      zoom: 15,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+
+    this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
+  }
+
+  checkIfAuthenticated() {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      this.isAuthenticated = true;
+      let navigationExtras: NavigationExtras = {
+        state: { user: this.user }
+      };
+      this.router.navigate(['/home'], navigationExtras);
     }
   }
 
-  onSubmit(form: NgForm) {
-    if (form.valid) {
-      this.loginData.email = form.value.username; // Obtenemos el nombre de usuario/correo del formulario
-      this.loginData.password = form.value.password;
+  loadUserFromLocalStorage() {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      this.user = JSON.parse(storedUser);
+    }
+  }
 
-      if (this.isPasswordValid(this.loginData.password)) {
-        this.userService.getUsers().subscribe((users) => {
-          const user = users.find(
-            (u) => u.email === this.loginData.email && u.password === this.loginData.password
-          );
+  saveUserToLocalStorage() {
+    localStorage.setItem('user', JSON.stringify(this.user));
+  }
 
-          if (user) {
-            // Si las credenciales son correctas, redirige a la tienda
-            this.router.navigate(['/tienda']);
-          } else {
-            // Si las credenciales son incorrectas, muestra un mensaje de error
-            console.log('Credenciales incorrectas');
-            alert('Correo o contraseña incorrectos.');
-          }
-        });
+  async ingresar() {
+    this.errorMessage = '';
+    if (this.isPasswordValid(this.user.password)) {
+      const token = this.sqliteService.login(this.user.email, this.user.password);
+      if (token) {
+        localStorage.setItem('auth_token', token);
+        this.saveUserToLocalStorage();
+        let navigationExtras: NavigationExtras = {
+          state: { user: this.user }
+        };
+        this.router.navigate(['/home'], navigationExtras);
       } else {
-        // Mostrar error si la contraseña no es válida
-        this.passwordError = 'La contraseña debe tener al menos 4 números, 3 caracteres y 1 mayúscula.';
+        this.errorMessage = 'Usuario o contraseña incorrectos';
+        this.passwordValid = false;
       }
     } else {
-      console.log('Formulario no válido');
+      this.errorMessage = 'Contraseña no cumple los requisitos';
+      this.passwordValid = false;
+    }
+  }
+
+  async registrar() {
+    this.errorMessage = '';
+    if (this.isPasswordValid(this.user.password)) {
+      const userCreated = await this.sqliteService.createUser(this.user.email, this.user.password); 
+      if (userCreated) {
+        this.errorMessage = 'Usuario registrado correctamente';
+        this.saveUserToLocalStorage();
+        let navigationExtras: NavigationExtras = {
+          state: { user: this.user }
+        };
+        this.router.navigate(['/home'], navigationExtras);
+      } else {
+        this.errorMessage = 'El usuario ya existe';
+      }
+    } else {
+      this.errorMessage = 'Contraseña no cumple los requisitos';
+      this.passwordValid = false;
     }
   }
 
   isPasswordValid(password: string): boolean {
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasNumeric = /\d{4}/.test(password); // Al menos 4 números
-    const hasLetter = /[a-zA-Z]{3}/.test(password); // Al menos 3 letras
-    const minLength = 8;
-
-    return hasUpperCase && hasNumeric && hasLetter && password.length >= minLength;
+    const regex = /^(?=(?:.*\d){4})(?=(?:.*[a-zA-Z]){3})(?=.*[A-Z]).{8,}$/;
+    return regex.test(password);
   }
 
-  closeModal() {
-    this.modal.dismiss();
+  async cerrarSesion() {
+    localStorage.removeItem('user');
+    localStorage.removeItem('auth_token');
+    this.isAuthenticated = false;
+    this.sqliteService.logout();
+    this.router.navigate(['/login']);
+  }
+
+  async checkServerConnection() {
+    this.http.get('https://1689-152-230-70-242.ngrok-free.app:3000/').subscribe(
+      (data) => {
+        console.log('Datos obtenidos del JSON Server:', data);
+        alert('Datos obtenidos: ' + JSON.stringify(data));
+      },
+      (error) => {
+        console.error('Error al conectarse al JSON Server', error);
+        alert('No se pudo conectar al JSON Server');
+      }
+    );
   }
 }
